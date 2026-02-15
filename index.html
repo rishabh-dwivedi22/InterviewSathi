@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>The InterviewSaathi: Vernacular Confidence Builder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+  <style>
+    body {
+      background-color: #fefefe;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .container {
+      max-width: 800px;
+      margin-top: 30px;
+      padding-bottom: 50px;
+    }
+
+    .header-section {
+      background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 15px rgba(13, 110, 253, 0.2);
+    }
+
+    .box {
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e9ecef;
+    }
+
+    .mic-btn {
+      font-size: 18px;
+      padding: 15px 40px;
+      border-radius: 50px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      width: 100%;
+      max-width: 300px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .recording-active {
+      background-color: #dc3545 !important;
+      border-color: #dc3545 !important;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    /* Hint Section */
+    .hint-box {
+      background-color: #fff3cd;
+      border-left: 5px solid #ffc107;
+      padding: 15px;
+      margin-top: 15px;
+      display: none;
+      font-size: 0.95rem;
+    }
+
+    /* Correction Logic Styles */
+    .correction-item {
+      background: #e9ecef;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .wrong-word {
+      color: #dc3545;
+      text-decoration: line-through;
+      margin-right: 10px;
+    }
+
+    .correct-word {
+      color: #198754;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="header-section text-center">
+      <h1 class="fw-bold">  InterviewSaathi</h1>
+      <p class="mb-0 fs-5">Vernacular Confidence Builder</p>
+      <small style="opacity: 0.8;">Specifically designed for students transitioning from Hindi to English</small>
+    </div>
+
+    <div class="box">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="text-primary fw-bold">📢 HR Question:</h5>
+        <span class="badge bg-secondary">Round 1</span>
+      </div>
+
+      <p id="questionText" class="display-6 fw-normal mb-4">Tell me about yourself.</p>
+
+      <button class="btn btn-outline-warning btn-sm mb-2" onclick="toggleHint()">
+        <i class="bi bi-lightbulb-fill"></i> Need Help with Structure?
+      </button>
+
+      <div id="hintBox" class="hint-box">
+        <strong>💡 Structure Suggestion:</strong>
+        <p class="mb-0 mt-1" id="hintText">Start with your name & degree -> Mention your technical skills (C, Java) ->
+          Talk about a project -> End with your goal.</p>
+      </div>
+      <div id="hintBox" class="hint-box">
+        <strong>💡 Structure Suggestion:</strong>
+        <p class="mb-0 mt-1" id="hintText">...</p>
+      </div>
+
+      <div id="templateBox" class="mt-3 p-3 border rounded bg-light"
+        style="display:none; border-left: 5px solid #0d6efd !important;">
+        <div class="d-flex justify-content-between">
+          <strong class="text-primary small text-uppercase">Professional Template:</strong>
+          <button class="btn btn-sm btn-light p-0" onclick="hideTemplate()"><i class="bi bi-x"></i></button>
+        </div>
+        <p class="mb-0 mt-1 fst-italic text-secondary" id="templateText" style="font-size: 0.9rem;"></p>
+      </div>
+
+      <div class="mt-3">
+        <button class="btn btn-outline-warning btn-sm" onclick="toggleHint()">
+          <i class="bi bi-lightbulb-fill"></i> Step-by-Step Hint
+        </button>
+        <button class="btn btn-outline-info btn-sm" onclick="showTemplate()">
+          <i class="bi bi-file-earmark-text-fill"></i> Give me a Template
+        </button>
+      </div>
+
+      <div class="text-end mt-3">
+        <button class="btn btn-outline-primary" onclick="nextQuestion()">Next Question <i
+            class="bi bi-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <div class="box text-center py-4">
+      <p id="status" class="text-muted mb-3 fst-italic">Don't worry about grammar, just speak...</p>
+      <button id="micBtn" class="btn btn-primary mic-btn" onclick="toggleRecording()">
+        <i class="bi bi-mic-fill"></i> Start Speaking
+      </button>
+    </div>
+
+    <div id="analysisBox" class="box" style="display:none;">
+      <h5 class="text-dark fw-bold mb-3">📝 Analysis & Corrections</h5>
+
+      <div class="p-3 bg-light rounded border mb-3">
+        <small class="text-muted text-uppercase">You Said:</small>
+        <p id="finalTranscript" class="lead mb-0 text-dark">...</p>
+      </div>
+
+      <div id="correctionArea">
+      </div>
+
+      <div class="mt-4">
+        <label class="form-label fw-bold">Confidence Score</label>
+        <div class="progress" style="height: 25px;">
+          <div id="scoreBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;">0%</div>
+        </div>
+        <p id="feedbackMsg" class="mt-2 small text-muted"></p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+
+
+    const interviewData = [
+      {
+        q: "Tell me about yourself.",
+        hint: "Greeting -> Name -> Education (BCA) -> Skills -> Projects.",
+        template: "Hello, I am [Name]. I am currently pursuing BCA from [College]. I have strong skills in [C/Java/Web Dev] and I have built projects like [Project Name]."
+      },
+      {
+        q: "Why should we hire you?",
+        hint: "Skills -> Quick Learner -> Goals.",
+        template: "You should hire me because I am a quick learner with technical skills in [Skill]. I am very passionate about coding and I want to contribute to your company's success."
+      },
+      {
+        q: "Describe a project you worked on.",
+        hint: "Problem -> Technology -> Result.",
+        template: "I built a project called [Name]. I used [Technology] to solve the problem of [Problem]. This project helped me understand how [Concept] works in real life."
+      },
+    ];
+
+    
+    const vernacularMap = {
+      
+      'main': 'I', 'mai': 'I', 'maine': 'I',
+      'hum': 'I', 'humne': 'I', 
+      'mera': 'my', 'meri': 'my', 'mere': 'my', 'hamara': 'our',
+      'mujhe': 'me', 'mujhko': 'me',
+      'tum': 'you', 'aap': 'you', 'tumhara': 'your', 'aapka': 'your',
+      'wo': 'he/she', 'usne': 'he/she', 'unhone': 'they',
+
+      
+      'matlab': 'I mean', 'yani': 'that is', 'arthat': 'meaning',
+      'kyunki': 'because', 'kyonki': 'because', 'kyuki': 'because',
+      'lekin': 'but', 'par': 'but', 'magar': 'but', 'kintu': 'but', 'parantu': 'but',
+      'aur': 'and', 'evam': 'and', 'tatha': 'and', 'or': 'and',
+      'agar': 'if', 'yadi': 'if',
+      'toh': 'then', 'fir': 'then', 'phir': 'then', 'tab': 'then',
+      'jab': 'when', 'jahan': 'where', 'wahan': 'there', 'yahan': 'here',
+      'waise': 'actually', 'jaise': 'like', 'udaharan': 'example',
+      'bas': 'just', 'sirf': 'only', 'kewal': 'only',
+
+      
+      'hai': 'is', 'hain': 'are', 'ho': 'are',
+      'tha': 'was', 'thi': 'was', 'the': 'were',
+      'ka':'of',
+      'hoon': 'am', 'hun': 'am',
+      'karna': 'do', 'kiya': 'did', 'karunga': 'will do', 'karenge': 'will do',
+      'gaya': 'went', 'aaya': 'came', 'gaye': 'went',
+      'bolna': 'speak', 'batana': 'tell', 'kehna': 'say',
+      'seekha': 'learned', 'padha': 'studied', 'banaya': 'built',
+      'samjha': 'understood', 'socha': 'thought', 'laga': 'felt',
+
+      
+      'padhai': 'education', 'shiksha': 'education',
+      'vishay': 'subject', 'ganit': 'mathematics', 'vigyan': 'science',
+      'naukri': 'job', 'kaam': 'work', 'kary': 'task',
+      'anubhav': 'experience', 'samay': 'time', 'waqt': 'time',
+      'sawaal': 'question', 'prashn': 'question', 'uttar': 'answer', 'jawaab': 'answer',
+      'safalta': 'success', 'lakshya': 'goal', 'sapna': 'dream',
+
+     
+      'accha': 'good', 'achi': 'good', 'badhiya': 'excellent', 'behtar': 'better',
+      'bura': 'bad', 'kharab': 'bad', 'bekar': 'useless',
+      'thoda': 'little', 'kam': 'less', 'jyada': 'more', 'adhik': 'more',
+      'sahi': 'correct', 'galat': 'wrong', 'kathin': 'difficult', 'aasaan': 'easy',
+      'jaruri': 'necessary', 'mahatvapurna': 'important'
+    };
+
+    let currentQIndex = 0;
+    let isRecording = false;
+    let recognition;
+    let finalTranscript = "";
+
+    
+    window.onload = () => { loadQuestion(0); };
+
+    function loadQuestion(index) {
+      document.getElementById('questionText').innerText = interviewData[index].q;
+      document.getElementById('hintText').innerText = interviewData[index].hint;
+
+      
+      document.getElementById('hintBox').style.display = 'none';
+      document.getElementById('templateBox').style.display = 'none';
+      document.getElementById('analysisBox').style.display = 'none';
+      document.getElementById('status').innerText = "Don't worry about grammar, just speak...";
+    }
+
+   
+    function toggleHint() {
+      const box = document.getElementById('hintBox');
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function showTemplate() {
+      const box = document.getElementById('templateBox');
+      document.getElementById('templateText').innerText = interviewData[currentQIndex].template;
+      box.style.display = 'block';
+    }
+
+    function hideTemplate() {
+      document.getElementById('templateBox').style.display = 'none';
+    }
+
+    function nextQuestion() {
+      currentQIndex = (currentQIndex + 1) % interviewData.length;
+      loadQuestion(currentQIndex);
+    }
+
+    
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-IN';
+
+      recognition.onresult = (event) => {
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript + " ";
+          } else {
+            interim += event.results[i][0].transcript;
+          }
+        }
+        document.getElementById('status').innerText = "Listening: " + interim;
+      };
+
+      recognition.onerror = (e) => { console.error(e); stopRecording(); };
+    }
+
+    function toggleRecording() {
+      if (!isRecording) startRecording();
+      else stopRecording();
+    }
+
+    function startRecording() {
+      finalTranscript = "";
+      recognition.start();
+      isRecording = true;
+      document.getElementById('micBtn').innerHTML = '<i class="bi bi-stop-circle"></i> Stop & Analyze';
+      document.getElementById('micBtn').classList.add('recording-active');
+      document.getElementById('status').innerText = "Listening... (Speak naturally)";
+      document.getElementById('analysisBox').style.display = 'none';
+    }
+
+    function stopRecording() {
+      recognition.stop();
+      isRecording = false;
+      document.getElementById('micBtn').innerHTML = '<i class="bi bi-mic-fill"></i> Start Speaking';
+      document.getElementById('micBtn').classList.remove('recording-active');
+      document.getElementById('status').innerText = "Processing your feedback...";
+
+      setTimeout(() => analyzeVernacular(finalTranscript), 1000);
+    }
+
+    
+    function analyzeVernacular(text) {
+      const words = text.toLowerCase().split(/\s+/);
+      document.getElementById('analysisBox').style.display = 'block';
+      document.getElementById('finalTranscript').innerText = text;
+
+      const correctionArea = document.getElementById('correctionArea');
+      correctionArea.innerHTML = '<h6 class="text-muted small fw-bold">SUGGESTED CORRECTIONS:</h6>';
+
+      let hinglishCount = 0;
+      let foundCorrections = false;
+
+      words.forEach(word => {
+        const cleanWord = word.replace(/[^a-zA-Z]/g, "");
+        if (vernacularMap[cleanWord]) {
+          hinglishCount++;
+          foundCorrections = true;
+          const item = document.createElement('div');
+          item.className = 'correction-item';
+          item.innerHTML = `
+          <span>You said: <span class="wrong-word">${cleanWord}</span></span>
+          <span>Try saying: <span class="correct-word">${vernacularMap[cleanWord]}</span></span>
+        `;
+          correctionArea.appendChild(item);
+        }
+      });
+
+      if (!foundCorrections) {
+        correctionArea.innerHTML += `<p class="text-success small"><i class="bi bi-check-circle-fill"></i> Great! No Hindi filler words detected.</p>`;
+      }
+
+      
+      let baseScore = 100;
+      baseScore -= (hinglishCount * 15); 
+      if (words.length < 5) baseScore -= 40;
+      if (baseScore < 10) baseScore = 10;
+      if (baseScore > 100) baseScore = 100;
+
+      const scoreBar = document.getElementById('scoreBar');
+      scoreBar.style.width = baseScore + "%";
+      scoreBar.innerText = baseScore + "%";
+
+      let msg = "";
+      if (baseScore > 80) {
+        scoreBar.className = "progress-bar bg-success";
+        msg = "Excellent! You are ready for the MNC interview.";
+      } else if (baseScore > 50) {
+        scoreBar.className = "progress-bar bg-warning text-dark";
+        msg = "Good start! Try to use the template for better structure.";
+      } else {
+        scoreBar.className = "progress-bar bg-danger";
+        msg = "Practice more with the Professional Template to improve your score.";
+      }
+      document.getElementById('feedbackMsg').innerText = msg;
+      document.getElementById('status').innerText = "Analysis Complete.";
+    }
+  </script>
+</body>
+
+</html>
