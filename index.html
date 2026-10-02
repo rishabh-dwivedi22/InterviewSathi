@@ -10,8 +10,8 @@
 
   <style>
     body {
-      background-color: #fefefe;
-      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', system-ui, sans-serif;
     }
 
     .container {
@@ -26,7 +26,7 @@
       padding: 30px;
       border-radius: 15px;
       margin-bottom: 25px;
-      box-shadow: 0 4px 15px rgba(13, 110, 253, 0.2);
+      box-shadow: 0 8px 20px rgba(13, 110, 253, 0.2);
     }
 
     .box {
@@ -34,8 +34,9 @@
       padding: 25px;
       border-radius: 12px;
       margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
       border: 1px solid #e9ecef;
+      transition: all 0.3s ease;
     }
 
     .mic-btn {
@@ -113,49 +114,53 @@
       <small style="opacity: 0.8;">Specifically designed for students transitioning from Hindi to English</small>
     </div>
 
-    <div class="box">
+    <div class="box position-relative">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="text-primary fw-bold">📢 HR Question:</h5>
-        <span class="badge bg-secondary">Round 1</span>
+        <h5 class="text-primary fw-bold mb-0">📢 HR Question:</h5>
+        <span class="badge bg-secondary" id="questionCounter">Q 1/20</span>
       </div>
 
-      <p id="questionText" class="display-6 fw-normal mb-4">Tell me about yourself.</p>
+      <div class="d-flex justify-content-between align-items-start mb-4">
+        <p id="questionText" class="display-6 fw-normal mb-0" style="font-size: 1.8rem;">Tell me about yourself.</p>
+        <button class="btn btn-light btn-sm text-primary rounded-circle ms-2 shadow-sm" onclick="speakText(document.getElementById('questionText').innerText)" title="Listen to Question">
+          <i class="bi bi-volume-up-fill fs-5"></i>
+        </button>
+      </div>
 
       <button class="btn btn-outline-warning btn-sm mb-2" onclick="toggleHint()">
         <i class="bi bi-lightbulb-fill"></i> Need Help with Structure?
       </button>
 
-      <div id="hintBox" class="hint-box">
+      <div id="hintBox" class="hint-box shadow-sm rounded">
         <strong>💡 Structure Suggestion:</strong>
-        <p class="mb-0 mt-1" id="hintText">Start with your name & degree -> Mention your technical skills (C, Java) ->
-          Talk about a project -> End with your goal.</p>
-      </div>
-      <div id="hintBox" class="hint-box">
-        <strong>💡 Structure Suggestion:</strong>
-        <p class="mb-0 mt-1" id="hintText">...</p>
+        <p class="mb-0 mt-1" id="hintText"></p>
       </div>
 
-      <div id="templateBox" class="mt-3 p-3 border rounded bg-light"
+      <div id="templateBox" class="mt-3 p-3 border rounded bg-light shadow-sm"
         style="display:none; border-left: 5px solid #0d6efd !important;">
-        <div class="d-flex justify-content-between">
+        <div class="d-flex justify-content-between align-items-center">
           <strong class="text-primary small text-uppercase">Professional Template:</strong>
-          <button class="btn btn-sm btn-light p-0" onclick="hideTemplate()"><i class="bi bi-x"></i></button>
+          <div>
+            <button class="btn btn-sm btn-light p-1 me-1 text-primary shadow-sm" onclick="speakText(document.getElementById('templateText').innerText)" title="Listen to Template">
+              <i class="bi bi-volume-up-fill"></i>
+            </button>
+            <button class="btn btn-sm btn-light p-1 text-danger shadow-sm" onclick="hideTemplate()" title="Close">
+              <i class="bi bi-x-circle-fill"></i>
+            </button>
+          </div>
         </div>
-        <p class="mb-0 mt-1 fst-italic text-secondary" id="templateText" style="font-size: 0.9rem;"></p>
+        <p class="mb-0 mt-2 fst-italic text-dark" id="templateText" style="font-size: 1.05rem; line-height: 1.5;"></p>
       </div>
 
-      <div class="mt-3">
-        <button class="btn btn-outline-warning btn-sm" onclick="toggleHint()">
-          <i class="bi bi-lightbulb-fill"></i> Step-by-Step Hint
-        </button>
+      <div class="mt-4">
         <button class="btn btn-outline-info btn-sm" onclick="showTemplate()">
           <i class="bi bi-file-earmark-text-fill"></i> Give me a Template
         </button>
       </div>
 
-      <div class="text-end mt-3">
-        <button class="btn btn-outline-primary" onclick="nextQuestion()">Next Question <i
-            class="bi bi-arrow-right"></i></button>
+      <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+        <button class="btn btn-outline-secondary" onclick="prevQuestion()"><i class="bi bi-arrow-left"></i> Previous</button>
+        <button class="btn btn-primary px-4" onclick="nextQuestion()">Next <i class="bi bi-arrow-right"></i></button>
       </div>
     </div>
 
@@ -194,8 +199,8 @@
     const interviewData = [
       {
         q: "Tell me about yourself.",
-        hint: "Greeting -> Name -> Education (BCA) -> Skills -> Projects.",
-        template: "Hello, I am [Name]. I am currently pursuing BCA from [College]. I have strong skills in [C/Java/Web Dev] and I have built projects like [Project Name]."
+        hint: "Greeting -> Name -> Education -> Skills -> Projects.",
+        template: "Hello, I am [Name]. I am currently pursuing [Degree] from [College]. I have strong skills in [Skills] and I have built projects like [Project Name]."
       },
       {
         q: "Why should we hire you?",
@@ -207,6 +212,91 @@
         hint: "Problem -> Technology -> Result.",
         template: "I built a project called [Name]. I used [Technology] to solve the problem of [Problem]. This project helped me understand how [Concept] works in real life."
       },
+      {
+        q: "What are your strengths?",
+        hint: "Soft skill -> Example -> How it helps.",
+        template: "My greatest strength is my [Problem-solving skill/Adaptability]. For example, during [Situation], I successfully [Action taken]. This helps me to [Benefit]."
+      },
+      {
+        q: "What are your weaknesses?",
+        hint: "Honest weakness -> Action taken to improve.",
+        template: "I sometimes struggle with [Public speaking/Time management], but I have been actively working on it by [Taking a course/Using a planner] to improve."
+      },
+      {
+        q: "Where do you see yourself in 5 years?",
+        hint: "Career growth -> Value addition -> Learning.",
+        template: "In five years, I see myself taking on more responsibilities in a [Role, e.g., Senior Developer] position, helping the team grow, and mastering [Technology/Skill]."
+      },
+      {
+        q: "How do you handle stress and pressure?",
+        hint: "Stay calm -> Prioritize -> Take action.",
+        template: "When under pressure, I stay calm and break down my tasks into smaller, manageable steps. I prioritize the most important tasks to meet deadlines efficiently."
+      },
+      {
+        q: "Why do you want to work for our company?",
+        hint: "Company research -> Alignment with goals -> Eagerness.",
+        template: "I want to work here because I admire your company's work in [Domain/Technology]. It aligns perfectly with my career goals, and I am eager to learn and grow with your team."
+      },
+      {
+        q: "Are you willing to relocate?",
+        hint: "Yes/No -> Reason -> Flexibility.",
+        template: "Yes, I am completely open to relocating. I consider it a great opportunity to experience a new environment and grow both personally and professionally."
+      },
+      {
+        q: "What is your greatest professional achievement?",
+        hint: "Task -> Action -> Result.",
+        template: "My greatest achievement so far was completing [Project/Task] ahead of schedule. By utilizing [Skill], I was able to deliver a high-quality result that received great feedback."
+      },
+      {
+        q: "Tell me about a time you faced a challenge and overcame it.",
+        hint: "Challenge -> Strategy -> Success.",
+        template: "During my college project, we faced a major issue with [Bug/Deadline]. I took the initiative to [Action taken], which resolved the issue and helped us submit on time."
+      },
+      {
+        q: "Do you prefer working independently or in a team?",
+        hint: "Adaptability -> Both have value.",
+        template: "I am comfortable with both. I enjoy the collaboration and brainstorming in a team, but I can also focus and deliver results when working independently."
+      },
+      {
+        q: "What is your expected salary?",
+        hint: "As per industry standards -> Focus on learning.",
+        template: "As a fresher, my primary focus is to start my career and learn as much as possible. However, I expect a salary as per company norms and industry standards."
+      },
+      {
+        q: "What do you know about our company?",
+        hint: "Product/Service -> Recent news -> Core values.",
+        template: "I know that your company is a leader in [Industry/Field] and is known for [Core value/Product]. I recently read about your new [Initiative/Project], which is very impressive."
+      },
+      {
+        q: "Do you have any questions for us?",
+        hint: "Show interest -> Ask about role/culture.",
+        template: "Yes, I would love to know more about the day-to-day responsibilities of this role and what the team culture is like here."
+      },
+      {
+        q: "How do you stay updated with new technologies?",
+        hint: "Blogs/Courses -> Practical implementation.",
+        template: "I regularly follow tech blogs like [Medium/Dev.to], watch tutorials on YouTube, and take up small projects to get hands-on practice with new technologies."
+      },
+      {
+        q: "What motivates you to do your best on the job?",
+        hint: "Learning -> Solving problems -> Impact.",
+        template: "I am highly motivated by the opportunity to learn new things and solve complex problems. Seeing my work make a positive impact is what drives me to do my best."
+      },
+      {
+        q: "Tell me about a time you failed and what you learned from it.",
+        hint: "Mistake -> Ownership -> Lesson learned.",
+        template: "In a past project, I underestimated the time needed for [Task]. It taught me the importance of proper time management and asking for help when needed."
+      },
+      {
+        q: "How would your friends or professors describe you?",
+        hint: "Positive trait -> Example.",
+        template: "My friends would describe me as a reliable and hardworking person. Whenever there is a group project, they usually rely on me to organize the tasks and keep things on track."
+      },
+      {
+        q: "What is the difference between hard work and smart work?",
+        hint: "Effort vs Efficiency.",
+        template: "Hard work is about putting in maximum time and effort, while smart work is about finding the most efficient way to achieve the same result in less time. I believe a combination of both is essential."
+      }
     ];
 
     
@@ -254,7 +344,18 @@
       'bura': 'bad', 'kharab': 'bad', 'bekar': 'useless',
       'thoda': 'little', 'kam': 'less', 'jyada': 'more', 'adhik': 'more',
       'sahi': 'correct', 'galat': 'wrong', 'kathin': 'difficult', 'aasaan': 'easy',
-      'jaruri': 'necessary', 'mahatvapurna': 'important'
+      'jaruri': 'necessary', 'mahatvapurna': 'important',
+      
+      'kal': 'tomorrow/yesterday', 'aaj': 'today', 'din': 'day', 'saal': 'year',
+      'mahina': 'month', 'hafta': 'week',
+      'bhi': 'also', 'kabhi': 'sometimes', 'hamesha': 'always',
+      'bilkul': 'absolutely', 'shayad': 'maybe', 'pata': 'know',
+      'koshish': 'try', 'mehnat': 'hard work', 'paise': 'money',
+      'dikkat': 'problem', 'pareshani': 'trouble', 'samasya': 'problem',
+      'samajh': 'understand', 'galati': 'mistake', 'bhai': 'brother',
+      'yaar': 'friend', 'kya': 'what', 'kyun': 'why', 'kaise': 'how',
+      'kahan': 'where', 'kaun': 'who', 'kab': 'when',
+      'chahiye': 'want/need', 'shuru': 'start', 'khatam': 'finish'
     };
 
     let currentQIndex = 0;
@@ -268,7 +369,7 @@
     function loadQuestion(index) {
       document.getElementById('questionText').innerText = interviewData[index].q;
       document.getElementById('hintText').innerText = interviewData[index].hint;
-
+      document.getElementById('questionCounter').innerText = `Q ${index + 1}/${interviewData.length}`;
       
       document.getElementById('hintBox').style.display = 'none';
       document.getElementById('templateBox').style.display = 'none';
@@ -276,7 +377,6 @@
       document.getElementById('status').innerText = "Don't worry about grammar, just speak...";
     }
 
-   
     function toggleHint() {
       const box = document.getElementById('hintBox');
       box.style.display = box.style.display === 'none' ? 'block' : 'none';
@@ -295,6 +395,20 @@
     function nextQuestion() {
       currentQIndex = (currentQIndex + 1) % interviewData.length;
       loadQuestion(currentQIndex);
+      window.speechSynthesis.cancel();
+    }
+
+    function prevQuestion() {
+      currentQIndex = (currentQIndex - 1 + interviewData.length) % interviewData.length;
+      loadQuestion(currentQIndex);
+      window.speechSynthesis.cancel();
+    }
+
+    function speakText(text) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-IN';
+      window.speechSynthesis.speak(utterance);
     }
 
     
@@ -347,6 +461,12 @@
 
     
     function analyzeVernacular(text) {
+      if (!text || text.trim() === "") {
+        document.getElementById('status').innerText = "No audio detected. Please try again.";
+        document.getElementById('analysisBox').style.display = 'none';
+        return;
+      }
+      
       const words = text.toLowerCase().split(/\s+/);
       document.getElementById('analysisBox').style.display = 'block';
       document.getElementById('finalTranscript').innerText = text;
