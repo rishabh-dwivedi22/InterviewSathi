@@ -419,6 +419,8 @@
       recognition.interimResults = true;
       recognition.lang = 'en-IN';
 
+      let silenceTimer = null;
+      
       recognition.onresult = (event) => {
         let interim = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
@@ -429,9 +431,18 @@
           }
         }
         document.getElementById('status').innerText = "Listening: " + interim;
+
+        // Auto-stop if no speech for 3 seconds
+        clearTimeout(silenceTimer);
+        silenceTimer = setTimeout(() => {
+          if (isRecording) stopRecording();
+        }, 3000);
       };
 
-      recognition.onerror = (e) => { console.error(e); stopRecording(); };
+      recognition.onerror = (e) => { 
+        console.error(e); 
+        if (isRecording) stopRecording(); 
+      };
     }
 
     function toggleRecording() {
